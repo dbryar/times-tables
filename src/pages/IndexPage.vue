@@ -42,12 +42,17 @@
             v-for="({ question, correctAnswer, playerAnswer, playerScore }, index) in lastGame"
             :key="index"
           >
-            <q-item-section class="text-right">{{ question }}</q-item-section>
-            <q-item-section class="text-right">{{ playerAnswer ?? "?" }}</q-item-section>
-            <q-item-section
-              >&nbsp;{{ playerAnswer == correctAnswer ? "✅" : `❌ (${correctAnswer})` }}
+            <q-item-section class="text-center question" no-wrap>
+              <span>{{ splitQuestion(question).first }}</span>
+              <span class="operator">x</span>
+              <span>{{ splitQuestion(question).last }}</span>
             </q-item-section>
-            <q-item-section class="text-center">{{ playerScore }}</q-item-section>
+            <q-item-section class="text-center">{{ playerAnswer ?? "?" }}</q-item-section>
+            <q-item-section no-wrap
+              >&nbsp;{{
+                playerAnswer == correctAnswer ? `✅ ( +${playerScore} )` : `❌ [ ${correctAnswer} ]`
+              }}
+            </q-item-section>
           </q-item>
         </q-list>
       </q-card-section>
@@ -79,6 +84,12 @@ export default defineComponent({
         if (!v && v !== 0) return "";
         return typeof v === "number" ? i18n(v) : v;
       },
+      splitQuestion: (question: string) => {
+        const parts = question.split("x");
+        const first = parts.shift()?.trim() ?? "";
+        const last = parts.pop()?.trim() ?? "";
+        return { first, last };
+      },
       startGame: (difficulty: string) => {
         router.push(difficulty);
       },
@@ -102,3 +113,20 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="scss" scoped>
+.question {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1px;
+}
+
+.question > span {
+  min-width: 1.6rem;
+}
+
+.operator {
+  min-width: 0.5rem !important;
+}
+</style>

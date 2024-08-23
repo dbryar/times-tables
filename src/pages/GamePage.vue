@@ -37,8 +37,8 @@
         track-color="grey-8"
         center-color="grey-5"
         :thickness="0.4"
-        show-value
         reverse
+        show-value
       >
         {{ playerScore }}
       </q-circular-progress>
@@ -57,6 +57,7 @@
 
       <!-- Answer Input -->
       <q-input
+        id="answer"
         v-model="playerAnswer"
         class="answer"
         input-class="answer-input"
@@ -150,6 +151,7 @@ export default defineComponent({
       remainingTime.value = timeLimit[difficulty] ?? 5;
       timeProgress.value = 100;
       localStore.set("expiryTime", Date.now() + remainingTime.value * 1000);
+      document.getElementById("answer")?.focus();
       checkTimer();
     };
 
@@ -338,14 +340,13 @@ export default defineComponent({
 
 .question-card {
   margin: 0 auto;
-  margin-bottom: 50vh; /* Pushes the card up by half the viewport height */
   width: 100%;
-  max-width: 600px; /* Ensure a reasonable max width for larger screens */
+  max-width: 600px;
 }
 
 @media (max-width: 600px) {
   .question-card {
-    margin-bottom: 50vh; /* Maintain space at the bottom for mobile screens */
+    margin-bottom: 40vh; /* Maintain space at the bottom for mobile screens */
   }
 }
 
