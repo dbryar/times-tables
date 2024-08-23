@@ -27,17 +27,22 @@
       </q-circular-progress>
 
       <!-- Score -->
-      <div class="score text-h5 text-center q-mt-md">{{ playerScore }}</div>
+      <div v-if="playerQuestions[currentQuestion]" class="score text-h5 text-center q-ma-md">
+        {{ playerScore }}
+      </div>
     </div>
 
     <!-- Main Question Display -->
-    <q-card class="q-pa-xl q-ma-md" flat bordered>
-      <div class="text-h1 text-center q-mb-lg">
+    <q-card v-if="playerQuestions[currentQuestion]" class="q-pa-xl q-ma-md" flat bordered>
+      <div class="text-h2 text-center q-mb-lg">
         {{ playerQuestions[currentQuestion]?.question ?? "" }}
       </div>
 
       <!-- Answer Input -->
       <q-input v-model="playerAnswer" autofocus type="number" outlined :debounce />
+    </q-card>
+    <q-card v-else class="q-pa-xl q-ma-md" flat bordered>
+      <div class="text-h2 text-center text-dark">{{ playerScore }}!</div>
     </q-card>
   </q-page>
 </template>
@@ -107,6 +112,7 @@ export default defineComponent({
         question: `${num1} x ${num2}`,
         correctAnswer: num1 * num2,
         playerAnswer: null,
+        playerScore: 0,
       });
       inputEnabled.value = true;
     };
@@ -127,20 +133,28 @@ export default defineComponent({
         if (Number(playerAnswer.value) === Number(correctAnswer)) {
           logger.info(`${i18n(Language.messageCorrect)}!`);
           pageBackgroundColor.value = `bg-${backgroundCorrect}`;
-          playerScore.value += correctScore[difficulty];
-          showNotification(true);
+          scoreAnswer();
+          showNotification(true, question, correctAnswer);
         } else {
           logger.info(`${i18n(Language.messageIncorrect)}!`);
           pageBackgroundColor.value = `bg-${backgroundIncorrect}`;
-          showNotification(false);
+          showNotification(false, question, correctAnswer);
         }
       }
       nextQuestion();
     };
 
+    // score the answer
+    const scoreAnswer = () => {
+      const score = Math.round(
+        correctScore[difficulty] + (correctScore[difficulty] * timeProgress.value) / 200
+      );
+      playerQuestions[currentQuestion.value].playerScore = score;
+      playerScore.value += score;
+    };
+
     // Show notification bubble
-    const showNotification = (isCorrect: boolean) => {
-      const { question, correctAnswer } = playerQuestions[currentQuestion.value];
+    const showNotification = (isCorrect: boolean, question: string, correctAnswer: number) => {
       Notify.create({
         message: `${i18n(
           isCorrect ? Language.messageCorrect : Language.messageIncorrect
@@ -261,6 +275,18 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   gap: 20px;
+}
+
+/* Media query for mobile screens in portrait mode */
+@media (max-width: 600px) {
+  .progress-container {
+    flex-direction: row;
+    top: 10px;
+    left: 10px;
+    justify-content: space-around;
+    width: 100%; /* Ensures the progress bars are spaced well on small screens */
+    align-items: flex-start; /* Keeps alignment consistent */
+  }
 }
 
 .score {

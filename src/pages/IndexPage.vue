@@ -34,21 +34,20 @@
         <q-btn label="Expert" color="negative" @click="startGame(Difficulty.EXPERT)" />
       </q-card-actions>
 
-      <q-card-section>
+      <q-card-section v-if="lastGame.length">
         <div class="text-h6 text-deep-purple">{{ render(Language.headingLastGame) }}</div>
         <q-list bordered>
           <q-item
             dense
-            v-for="({ question, correctAnswer, playerAnswer }, index) in lastGame"
+            v-for="({ question, correctAnswer, playerAnswer, playerScore }, index) in lastGame"
             :key="index"
           >
             <q-item-section class="text-right">{{ question }}</q-item-section>
             <q-item-section class="text-right">{{ playerAnswer ?? "?" }}</q-item-section>
             <q-item-section
-              >&nbsp;{{
-                playerAnswer == correctAnswer ? "✅" : `❌ (${correctAnswer})`
-              }}</q-item-section
-            >
+              >&nbsp;{{ playerAnswer == correctAnswer ? "✅" : `❌ (${correctAnswer})` }}
+            </q-item-section>
+            <q-item-section class="text-center">{{ playerScore }}</q-item-section>
           </q-item>
         </q-list>
       </q-card-section>

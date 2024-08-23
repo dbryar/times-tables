@@ -9,4 +9,5 @@ export interface Questions {
   question: string;
   correctAnswer: number;
   playerAnswer: number | null;
+  playerScore: number;
 }
