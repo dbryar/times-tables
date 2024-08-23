@@ -243,7 +243,7 @@ export default defineComponent({
 
     return {
       debounce,
-      readonly: !inputEnabled.value,
+      readonly: ref(!inputEnabled.value),
       questionsRemaining,
       questionsProgress,
       currentQuestion,
