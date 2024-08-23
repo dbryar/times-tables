@@ -61,11 +61,10 @@
         v-model="playerAnswer"
         class="answer"
         input-class="answer-input"
-        autofocus
         type="number"
         outlined
         :debounce
-        :readonly="!inputEnabled"
+        :disabled="!inputEnabled"
       />
     </q-card>
     <q-card v-else class="q-pa-xl q-ma-md" flat bordered>
