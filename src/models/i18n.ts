@@ -16,6 +16,12 @@ export enum Language {
   // Placeholders
 
   // Messages
+  "messageGameStart",
+  "messageGameOver",
+  "messageCheckAnswer",
+  "messageCorrect",
+  "messageIncorrect",
+  "messageHighScore",
 
   // Errors
 

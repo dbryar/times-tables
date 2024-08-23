@@ -2,13 +2,17 @@
   <q-page class="q-pa-md">
     <q-card class="q-ma-md" flat bordered>
       <q-card-section>
-        <div class="text-h2 text-center">{{ render(Language.headingMainPage) }}</div>
+        <div class="text-h3 text-center text-primary">{{ render(Language.headingMainPage) }}</div>
       </q-card-section>
 
       <q-card-section>
-        <div class="text-h6">{{ render(Language.headingHighScores) }}</div>
-        <q-list bordered>
-          <q-item v-for="([player, score], index) in topScores()" :key="index">
+        <div class="text-h6 text-deep-purple">{{ render(Language.headingHighScores) }}</div>
+        <q-list bordered dense>
+          <q-item
+            v-for="([player, score], index) in topScores()"
+            :key="index"
+            :class="hsColour(index)"
+          >
             <q-item-section># {{ index + 1 }}</q-item-section>
             <q-item-section>{{ score }}</q-item-section>
             <q-item-section>{{ player }}</q-item-section>
@@ -17,7 +21,7 @@
       </q-card-section>
 
       <q-card-section>
-        <div class="text-h6">{{ render(Language.headingPlayerName) }}</div>
+        <div class="text-h6 text-deep-purple">{{ render(Language.headingPlayerName) }}</div>
         <div>
           <q-input v-model="playerName" outlined debounce="700" />
         </div>
@@ -31,18 +35,20 @@
       </q-card-actions>
 
       <q-card-section>
-        <div class="text-h6">{{ render(Language.headingLastGame) }}</div>
+        <div class="text-h6 text-deep-purple">{{ render(Language.headingLastGame) }}</div>
         <q-list bordered>
           <q-item
             dense
             v-for="({ question, correctAnswer, playerAnswer }, index) in lastGame"
             :key="index"
           >
-            <q-item-section>{{ question }}</q-item-section>
-            <q-item-section>{{ playerAnswer ?? "?" }}</q-item-section>
-            <q-item-section>{{
-              playerAnswer == correctAnswer ? "✅" : `❌ (${correctAnswer})`
-            }}</q-item-section>
+            <q-item-section class="text-right">{{ question }}</q-item-section>
+            <q-item-section class="text-right">{{ playerAnswer ?? "?" }}</q-item-section>
+            <q-item-section
+              >&nbsp;{{
+                playerAnswer == correctAnswer ? "✅" : `❌ (${correctAnswer})`
+              }}</q-item-section
+            >
           </q-item>
         </q-list>
       </q-card-section>
@@ -66,6 +72,10 @@ export default defineComponent({
     const playerName = ref(localStore.get<string>("player", ""));
     const i18n = inject<(v: string | number, p?: Record<string, unknown>) => string>("i18n")!;
     const fn = {
+      hsColour: (index: number) => {
+        if (index > 2) return "bg-white";
+        return `bg-green-${5 - 2 * index}`;
+      },
       render: (v?: string | number) => {
         if (!v && v !== 0) return "";
         return typeof v === "number" ? i18n(v) : v;

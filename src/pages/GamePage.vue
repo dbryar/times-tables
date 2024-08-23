@@ -31,33 +31,29 @@
     </div>
 
     <!-- Main Question Display -->
-    <div class="text-h1 text-center q-mb-lg">
-      {{ playerQuestions[currentQuestion]?.question ?? "" }}
-    </div>
+    <q-card class="q-pa-xl q-ma-md" flat bordered>
+      <div class="text-h1 text-center q-mb-lg">
+        {{ playerQuestions[currentQuestion]?.question ?? "" }}
+      </div>
 
-    <!-- Answer Input -->
-    <q-input
-      v-model="playerAnswer"
-      autofocus
-      type="number"
-      class="q-mb-xl"
-      outlined
-      debounce="900"
-    />
+      <!-- Answer Input -->
+      <q-input v-model="playerAnswer" autofocus type="number" outlined :debounce />
+    </q-card>
   </q-page>
 </template>
 
 <script lang="ts">
 import { Notify } from "quasar";
-import { defineComponent, onMounted, reactive, ref, watch } from "vue";
+import { defineComponent, inject, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import { Difficulty, Questions } from "@/models";
+import { Difficulty, Language, Questions } from "@/models";
 import { localStore, logger } from "@/services";
 
 export default defineComponent({
   name: "GamePage",
   setup() {
+    const debounce = 990;
     const questionsCount = 10;
     const backgroundDefault = "light-blue-3";
     const backgroundCorrect = "positive";
@@ -83,8 +79,8 @@ export default defineComponent({
 
     const { params } = useRoute();
     const router = useRouter();
+    const i18n = inject<(v: string | number, p?: Record<string, unknown>) => string>("i18n")!;
     const difficulty = params.difficulty as Difficulty;
-    const inputEnabled = ref(false);
     const playerName = localStore.get<string>("player", "Player");
     const playerScore = ref(0);
     const playerAnswer = ref(null);
@@ -92,6 +88,7 @@ export default defineComponent({
     const currentQuestion = ref(0);
     const playerQuestions = reactive<Questions[]>([]);
     const timer = ref<NodeJS.Timeout | null>(null);
+    const inputEnabled = ref(false);
     const pageBackgroundColor = ref(`bg-${backgroundDefault}`);
     const highScores = localStore.get<Record<string, number>>("highScores", { Dan: 10 });
 
@@ -115,20 +112,25 @@ export default defineComponent({
     };
 
     // Check the answer
-    const checkAnswer = (check = inputEnabled.value) => {
+    const checkAnswer = async (check = inputEnabled.value) => {
       if (!check) return;
       if (currentQuestion.value < questionsCount) {
         clearTimer();
         inputEnabled.value = false;
+        await new Promise((resolve) => setTimeout(resolve, debounce)); // let the debounce finish
         const { question, correctAnswer } = playerQuestions[currentQuestion.value];
-        logger.debug(`Checking answer for ${question}: ${playerAnswer.value} vs ${correctAnswer}`);
+        logger.info(
+          `${i18n(Language.messageCheckAnswer)} ${question}: ${
+            playerAnswer.value
+          } = ${correctAnswer}`
+        );
         if (Number(playerAnswer.value) === Number(correctAnswer)) {
-          logger.info("Correct!");
+          logger.info(`${i18n(Language.messageCorrect)}!`);
           pageBackgroundColor.value = `bg-${backgroundCorrect}`;
           playerScore.value += correctScore[difficulty];
           showNotification(true);
         } else {
-          logger.info("Incorrect!");
+          logger.info(`${i18n(Language.messageIncorrect)}!`);
           pageBackgroundColor.value = `bg-${backgroundIncorrect}`;
           showNotification(false);
         }
@@ -140,7 +142,9 @@ export default defineComponent({
     const showNotification = (isCorrect: boolean) => {
       const { question, correctAnswer } = playerQuestions[currentQuestion.value];
       Notify.create({
-        message: `${question} = ${correctAnswer}`,
+        message: `${i18n(
+          isCorrect ? Language.messageCorrect : Language.messageIncorrect
+        )}! ${question} = ${correctAnswer}`,
         color: isCorrect ? backgroundCorrect : backgroundIncorrect,
         position: "top-right",
         timeout: 2000,
@@ -190,17 +194,17 @@ export default defineComponent({
 
     // End game
     const endGame = () => {
-      if (timer.value) clearInterval(timer.value);
+      clearTimer();
       Notify.create({
-        message: `Game over! Your score is ${playerScore.value}`,
+        message: `${i18n(Language.messageGameOver)} ${playerScore.value}`,
         color: "blue",
         position: "top-right",
         timeout: 4000,
       });
       setTimeout(() => {
-        if (playerScore.value > highScores[playerName]) {
+        if (playerScore.value > (highScores[playerName] || 0)) {
           Notify.create({
-            message: `New high score! ${playerScore.value}`,
+            message: i18n(Language.messageHighScore, { highscore: playerScore.value }),
             color: "positive",
             position: "top-right",
           });
@@ -212,7 +216,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      logger.info(`Starting game with ${difficulty} difficulty`);
+      logger.info(i18n(Language.messageGameStart, { difficulty }));
       generateQuestion();
       startTimer();
     });
@@ -224,6 +228,7 @@ export default defineComponent({
     });
 
     return {
+      debounce,
       questionsRemaining,
       questionsProgress,
       currentQuestion,
