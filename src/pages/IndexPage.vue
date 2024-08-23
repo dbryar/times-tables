@@ -89,7 +89,7 @@ export default defineComponent({
     };
 
     watch(playerName, (newVal) => {
-      localStore.set("player", newVal);
+      localStore.set("player", newVal.trim());
     });
 
     return {

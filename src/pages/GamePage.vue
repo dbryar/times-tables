@@ -39,7 +39,7 @@
       </div>
 
       <!-- Answer Input -->
-      <q-input v-model="playerAnswer" autofocus type="number" outlined :debounce />
+      <q-input v-model="playerAnswer" autofocus type="number" outlined :debounce :readonly />
     </q-card>
     <q-card v-else class="q-pa-xl q-ma-md" flat bordered>
       <div class="text-h2 text-center text-dark">{{ playerScore }}!</div>
@@ -243,6 +243,7 @@ export default defineComponent({
 
     return {
       debounce,
+      readonly: !inputEnabled.value,
       questionsRemaining,
       questionsProgress,
       currentQuestion,
