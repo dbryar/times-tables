@@ -143,7 +143,6 @@ export default defineComponent({
       });
 
       inputEnabled.value = true;
-      setTimer();
     };
 
     const setTimer = () => {
@@ -179,6 +178,7 @@ export default defineComponent({
       if (!check) return;
       if (currentQuestion.value < questionsCount) {
         inputEnabled.value = false;
+        clearTimer();
         await new Promise((resolve) => setTimeout(resolve, playerAnswer.value ? 0 : debounce)); // let the debounce finish if the value is null
         const { question, correctAnswer } = playerQuestions[currentQuestion.value];
         logger.info(
@@ -231,13 +231,13 @@ export default defineComponent({
       pageBackgroundColor.value = `bg-${backgroundDefault}`;
       if (currentQuestion.value < questionsCount) {
         generateQuestion();
+        setTimer();
       } else {
         endGame();
       }
     };
 
     const advanceQuestionCount = () => {
-      clearTimer();
       currentQuestion.value++;
       questionsRemaining.value = questionsCount - currentQuestion.value;
       questionsProgress.value = (currentQuestion.value / questionsCount) * 100;
@@ -270,6 +270,7 @@ export default defineComponent({
     onMounted(() => {
       logger.info(i18n(Language.messageGameStart, { difficulty }));
       generateQuestion();
+      setTimer();
     });
 
     watch(playerAnswer, (newVal) => {
