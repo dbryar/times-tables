@@ -112,7 +112,7 @@ export default defineComponent({
     const router = useRouter();
     const i18n = inject<(v: string | number, p?: Record<string, unknown>) => string>("i18n")!;
     const difficulty = params.difficulty as Difficulty;
-    const highScores = localStore.get<Record<string, number>>("highScores", { Dan: 10 });
+    const highScores = localStore.get<Record<string, number>>("highScores", {});
     const playerName = localStore.get<string>("player", "Player");
     const playerScore = ref(0);
     const playerTarget = highScores[playerName] || 0;
